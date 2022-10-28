@@ -1,0 +1,40 @@
+#version 450
+
+in vec2 texCoords;
+
+layout(location = 0)uniform sampler2D screenTexture;
+layout(location = 1)uniform sampler2D bloomTexture;
+
+uniform float exposure;
+uniform float gamma;
+out vec4 color;
+
+
+void main()
+{
+	//normal texture
+	vec3 hdrColor = texture(screenTexture,texCoords).rgb;
+	vec3 bloomColor = texture(bloomTexture,texCoords).rgb;
+	//tone Mapping
+	//vec3 mapped = hdrColor/(hdrColor+vec3(1.0f));
+	hdrColor += bloomColor;
+	vec3 mapped = vec3(1.0f) - exp(-hdrColor * exposure);
+	
+	//gamma correction
+	float gammacoef = 0.5f;
+	
+	
+	
+	mapped = pow(mapped,vec3(1.0f/gamma));
+	
+	color = vec4(mapped,1.0f);
+
+	//inverted
+	//color = vec4(1.0f - mapped,1.0f);
+
+	//grayscale
+	//float avg = 0.2126 * mapped.r + 0.7152 * mapped.g + 0.0722 * mapped.b;
+	//color = vec4(avg,avg,avg,1.0f);
+
+}
+
